@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אלפון נוה שיר</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .filter-group input {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .stats {
+            text-align: center;
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 18px 15px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        
+        tbody tr:nth-child(even):hover {
+            background-color: #f0f1ff;
+        }
+        
+        td {
+            padding: 15px;
+            text-align: right;
+        }
+        
+        .phone-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .phone-link:hover {
+            text-decoration: underline;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-self: flex-end;
+        }
+        
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238, 90, 90, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>אלפון נוה שיר</h1>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="firstName">שם פרטי</label>
+                <input type="text" id="firstName" placeholder="חפש שם פרטי...">
+            </div>
+            <div class="filter-group">
+                <label for="familyName">שם משפחה</label>
+                <input type="text" id="familyName" placeholder="חפש שם משפחה...">
+            </div>
+            <div class="filter-group">
+                <label for="street">רחוב</label>
+                <input type="text" id="street" placeholder="חפש רחוב...">
+            </div>
+            <div class="filter-group">
+                <label for="houseNum">מספר בית</label>
+                <input type="text" id="houseNum" placeholder="חפש מספר...">
+            </div>
+            <div class="filter-group">
+                <button class="clear-btn" onclick="clearFilters()">נקה חיפוש</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            מציג <span id="resultsCount">0</span> תוצאות מתוך <span id="totalCount">0</span>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>שם פרטי</th>
+                        <th>שם משפחה</th>
+                        <th>רחוב</th>
+                        <th>מספר</th>
+                        <th>טלפון</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+  {"street": "העשור", "house_num": 1, "family_name": "יושעי", "first_name": "ניתאי", "phone": "0509299911"},
+  {"street": "העשור", "house_num": 1, "family_name": "יושעי", "first_name": "יסכה", "phone": "0502480036"},
+  {"street": "העשור", "house_num": 3, "family_name": "ליאור", "first_name": "צבי", "phone": "0526646009"},
+  {"street": "העשור", "house_num": 3, "family_name": "ליאור", "first_name": "הדר", "phone": "0525981091"},
+  {"street": "העשור", "house_num": 5, "family_name": "לנדסמן", "first_name": "כפיר", "phone": "0508899259"},
+  {"street": "העשור", "house_num": 5, "family_name": "לנדסמן", "first_name": "הילה", "phone": "0524772826"},
+  {"street": "העשור", "house_num": 7, "family_name": "עמרני", "first_name": "נחמיה", "phone": "0505076724"},
+  {"street": "העשור", "house_num": 7, "family_name": "עמרני", "first_name": "יוכי", "phone": "0536663435"},
+  {"street": "הפעמון", "house_num": 3, "family_name": "ברודר", "first_name": "איתן", "phone": "0542119401"},
+  {"street": "הפעמון", "house_num": 3, "family_name": "ברודר", "first_name": "רחלי", "phone": "0524345040"},
+  {"street": "הפעמון", "house_num": 5, "family_name": "בלונדהיים", "first_name": "שראל", "phone": "0528109525"},
+  {"street": "הפעמון", "house_num": 5, "family_name": "בלונדהיים", "first_name": "לירון", "phone": "0547793012"},
+  {"street": "הפעמון", "house_num": 7, "family_name": "שטרן", "first_name": "דוד", "phone": "0545783757"},
+  {"street": "הפעמון", "house_num": 7, "family_name": "שטרן", "first_name": "הדס", "phone": "0526696103"},
+  {"street": "הפעמון", "house_num": 9, "family_name": "דוד", "first_name": "אביתר", "phone": "0526303309"},
+  {"street": "הפעמון", "house_num": 9, "family_name": "דוד", "first_name": "אורית", "phone": "0526321309"},
+  {"street": "הפעמון", "house_num": 11, "family_name": "לופז", "first_name": "כלב", "phone": "0505440009"},
+  {"street": "הפעמון", "house_num": 11, "family_name": "לופז", "first_name": "סיון", "phone": "0528094545"},
+  {"street": "הנבל", "house_num": 2, "family_name": "מועלם", "first_name": "יהונתן", "phone": "0507847558"},
+  {"street": "הנבל", "house_num": 2, "family_name": "מועלם", "first_name": "שירלי", "phone": "0547808115"},
+  {"street": "הנבל", "house_num": 4, "family_name": "פליישמן", "first_name": "נתנאל", "phone": "0542571517"},
+  {"street": "הנבל", "house_num": 4, "family_name": "פליישמן", "first_name": "עדי", "phone": "0546548586"},
+  {"street": "הנבל", "house_num": 6, "family_name": "שטיינמץ", "first_name": "אוריאל", "phone": "0502207367"},
+  {"street": "הנבל", "house_num": 6, "family_name": "שטיינמץ", "first_name": "מלכי", "phone": "0527906350"},
+  {"street": "הנבל", "house_num": 8, "family_name": "שוק", "first_name": "ישראל", "phone": "0546582500"},
+  {"street": "הנבל", "house_num": 8, "family_name": "שוק", "first_name": "סמדר", "phone": "0528827064"},
+  {"street": "הנבל", "house_num": 10, "family_name": "חמילבסקי", "first_name": "בועז", "phone": "0546091654"},
+  {"street": "הנבל", "house_num": 10, "family_name": "חמילבסקי", "first_name": "רעות", "phone": "0556656764"},
+  {"street": "הנבל", "house_num": 12, "family_name": "גיזבר", "first_name": "אביעד", "phone": "0549130770"},
+  {"street": "הנבל", "house_num": 12, "family_name": "גיזבר", "first_name": "שירה", "phone": "0503130682"},
+  {"street": "הכינור", "house_num": 11, "family_name": "בן כליפא", "first_name": "אלי", "phone": "0524474469"},
+  {"street": "הכינור", "house_num": 11, "family_name": "בן כליפא", "first_name": "סימה", "phone": "0526520615"},
+  {"street": "הכינור", "house_num": 13, "family_name": "קשי", "first_name": "שגב", "phone": "0558826237"},
+  {"street": "הכינור", "house_num": 13, "family_name": "קשי", "first_name": "הודיה", "phone": "0525362962"},
+  {"street": "הכינור", "house_num": 15, "family_name": "ואנונו", "first_name": "יוסי", "phone": "0506622826"},
+  {"street": "הכינור", "house_num": 15, "family_name": "ואנונו", "first_name": "אביה", "phone": "0536227211"},
+  {"street": "הכינור", "house_num": 17, "family_name": "גדנקן", "first_name": "דביר", "phone": "0526357706"},
+  {"street": "הכינור", "house_num": 17, "family_name": "גדנקן", "first_name": "ציפורה", "phone": "0503336558"},
+  {"street": "הכינור", "house_num": 19, "family_name": "גרינבאום", "first_name": "מתן", "phone": "0546944451"},
+  {"street": "הכינור", "house_num": 19, "family_name": "גרינבאום", "first_name": "לאה", "phone": "0504844795"},
+  {"street": "הכינור", "house_num": 21, "family_name": "סימן טוב", "first_name": "ניר", "phone": "0502875553"},
+  {"street": "הכינור", "house_num": 21, "family_name": "סימן טוב", "first_name": "תהילה", "phone": "0505820900"},
+  {"street": "הכינור", "house_num": 2, "family_name": "ניסטופובר", "first_name": "אביעד", "phone": "0586818021"},
+  {"street": "הכינור", "house_num": 2, "family_name": "ניסטופובר", "first_name": "יובל", "phone": "0503840000"},
+  {"street": "הכינור", "house_num": 2, "family_name": "שמחון", "first_name": "עשהאל", "phone": "0508676911"},
+  {"street": "הכינור", "house_num": 2, "family_name": "שמחון", "first_name": "אמונה", "phone": "0549844727"},
+  {"street": "הכינור", "house_num": 4, "family_name": "פרנקל", "first_name": "אביאל", "phone": "0584540304"},
+  {"street": "הכינור", "house_num": 4, "family_name": "פרנקל", "first_name": "אליאור", "phone": "0524639080"},
+  {"street": "הכינור", "house_num": 4, "family_name": "לוי", "first_name": "שונה", "phone": "0584158898"},
+  {"street": "הכינור", "house_num": 6, "family_name": "שיש", "first_name": "יוהאן", "phone": "0586589255"},
+  {"street": "הכינור", "house_num": 6, "family_name": "שיש", "first_name": "שרה", "phone": "0543401847"},
+  {"street": "הכינור", "house_num": 6, "family_name": "אייזנברג", "first_name": "נתנאל", "phone": "0522450075"},
+  {"street": "הכינור", "house_num": 6, "family_name": "אייזנברג", "first_name": "איילה", "phone": "0503677206"},
+  {"street": "הכינור", "house_num": 8, "family_name": "דרייפוס", "first_name": "אבישי", "phone": "0526780885"},
+  {"street": "הכינור", "house_num": 8, "family_name": "דרייפוס", "first_name": "ענהאל", "phone": "0525118870"},
+  {"street": "הכינור", "house_num": 8, "family_name": "עמוס", "first_name": "ינון", "phone": "0543121505"},
+  {"street": "הכינור", "house_num": 8, "family_name": "עמוס", "first_name": "תהילה", "phone": "0525441315"},
+  {"street": "הכינור", "house_num": 10, "family_name": "קולווין", "first_name": "בועז", "phone": "0536212338"},
+  {"street": "הכינור", "house_num": 10, "family_name": "קולווין", "first_name": "אבישג", "phone": "0504441825"},
+  {"street": "הכינור", "house_num": 10, "family_name": "בכר", "first_name": "אביב", "phone": "0506332640"},
+  {"street": "הכינור", "house_num": 10, "family_name": "בכר", "first_name": "קרן", "phone": "0523223039"},
+  {"street": "הכינור", "house_num": 12, "family_name": "כהן", "first_name": "אלון", "phone": "0525153135"},
+  {"street": "הכינור", "house_num": 12, "family_name": "כהן", "first_name": "טל", "phone": "0548006270"},
+  {"street": "הכינור", "house_num": 12, "family_name": "פרנקל", "first_name": "הלל", "phone": "0587579194"},
+  {"street": "הכינור", "house_num": 12, "family_name": "פרנקל", "first_name": "שקמה", "phone": "0546789458"},
+  {"street": "הכינור", "house_num": 14, "family_name": "שאולזון", "first_name": "אוריאל", "phone": "0506686886"},
+  {"street": "הכינור", "house_num": 14, "family_name": "שאולזון", "first_name": "מעיין", "phone": "0524055930"},
+  {"street": "הכינור", "house_num": 14, "family_name": "מימון", "first_name": "איתן", "phone": "0542049771"},
+  {"street": "הכינור", "house_num": 14, "family_name": "מימון", "first_name": "יהב", "phone": "0527092520"},
+  {"street": "הכינור", "house_num": 16, "family_name": "בן אליהו", "first_name": "יואב", "phone": "0505990308"},
+  {"street": "הכינור", "house_num": 16, "family_name": "בן אליהו", "first_name": "נועה", "phone": "0587722782"},
+  {"street": "הכינור", "house_num": 16, "family_name": "מזרחי", "first_name": "שילה", "phone": "0556653405"},
+  {"street": "הכינור", "house_num": 16, "family_name": "מזרחי", "first_name": "צופיה", "phone": "0587793577"},
+  {"street": "הכינור", "house_num": 18, "family_name": "אחדות", "first_name": "איתמר", "phone": "0542980028"},
+  {"street": "הכינור", "house_num": 18, "family_name": "אחדות", "first_name": "שני", "phone": "0586011115"},
+  {"street": "הכינור", "house_num": 18, "family_name": "כהן", "first_name": "נועם", "phone": "0585455013"},
+  {"street": "הכינור", "house_num": 18, "family_name": "כהן", "first_name": "אלרועי", "phone": "0526348033"},
+  {"street": "הכינור", "house_num": 20, "family_name": "קרידטור", "first_name": "גרשון", "phone": "0527040032"},
+  {"street": "הכינור", "house_num": 20, "family_name": "קרידטור", "first_name": "רעות", "phone": "0538207999"},
+  {"street": "הכינור", "house_num": 20, "family_name": "שמאע", "first_name": "יצחק", "phone": "0556884845"},
+  {"street": "הכינור", "house_num": 20, "family_name": "שמאע", "first_name": "אליענה", "phone": "0586549368"},
+  {"street": "הכינור", "house_num": 22, "family_name": "מויאל", "first_name": "נדב", "phone": "0548841313"},
+  {"street": "הכינור", "house_num": 22, "family_name": "מויאל", "first_name": "יובל", "phone": "0528389142"},
+  {"street": "הכינור", "house_num": 22, "family_name": "קורש", "first_name": "ידידיה", "phone": "0542296484"},
+  {"street": "הכינור", "house_num": 22, "family_name": "קורש", "first_name": "שהם", "phone": "0504302455"},
+  {"street": "הכינור", "house_num": 24, "family_name": "קלוש", "first_name": "הושע", "phone": "0527203076"},
+  {"street": "הכינור", "house_num": 24, "family_name": "קלוש", "first_name": "טליה", "phone": "0547929028"},
+  {"street": "הכינור", "house_num": 24, "family_name": "מזרחי", "first_name": "יוני", "phone": "0524070255"},
+  {"street": "הכינור", "house_num": 24, "family_name": "מזרחי", "first_name": "קורל", "phone": "0508474677"},
+  {"street": "הכינור", "house_num": 26, "family_name": "ואנונו", "first_name": "מאיר", "phone": "0543555730"},
+  {"street": "הכינור", "house_num": 26, "family_name": "ואנונו", "first_name": "מאירה", "phone": "0556635881"},
+  {"street": "הכינור", "house_num": 26, "family_name": "גבאי", "first_name": "מאור", "phone": "0528449077"},
+  {"street": "הכינור", "house_num": 26, "family_name": "גבאי", "first_name": "עמר", "phone": "0524042452"},
+  {"street": "הכינור", "house_num": 28, "family_name": "וייזינגר", "first_name": "יונתן", "phone": "0509061528"},
+  {"street": "הכינור", "house_num": 28, "family_name": "וייזינגר", "first_name": "עדי", "phone": "0527565322"},
+  {"street": "הכינור", "house_num": 30, "family_name": "אושפזאי", "first_name": "יחיעם", "phone": "0503031341"},
+  {"street": "הכינור", "house_num": 30, "family_name": "אושפזאי", "first_name": "אלה", "phone": "0545456062"},
+  {"street": "הכינור", "house_num": 30, "family_name": "גלמן", "first_name": "הראל", "phone": "0535287698"},
+  {"street": "הכינור", "house_num": 30, "family_name": "גלמן", "first_name": "אוראל", "phone": "0585894468"},
+  {"street": "הכינור", "house_num": 32, "family_name": "גבעון", "first_name": "משה", "phone": "0556651440"},
+  {"street": "הכינור", "house_num": 32, "family_name": "גבעון", "first_name": "רעות", "phone": "0535283717"},
+  {"street": "הכינור", "house_num": 32, "family_name": "הורביץ", "first_name": "יאיר", "phone": "0532829571"},
+  {"street": "הכינור", "house_num": 32, "family_name": "הורביץ", "first_name": "ליאת", "phone": "0548099293"},
+  {"street": "הכינור", "house_num": 34, "family_name": "סימון", "first_name": "אילן", "phone": "0584495404"},
+  {"street": "הכינור", "house_num": 34, "family_name": "סימון", "first_name": "שמחה", "phone": "0587815154"},
+  {"street": "הכינור", "house_num": 34, "family_name": "רזניקוביץ", "first_name": "דביר", "phone": "0525688870"},
+  {"street": "הכינור", "house_num": 34, "family_name": "רזניקוביץ", "first_name": "ארשת", "phone": "0545455932"},
+  {"street": "קרווילות", "house_num": 6050, "family_name": "פרידמן", "first_name": "אסף", "phone": "0522837236"},
+  {"street": "קרווילות", "house_num": 6050, "family_name": "פרידמן", "first_name": "נוגה", "phone": "0523455483"},
+  {"street": "קרווילות", "house_num": 6051, "family_name": "סידו", "first_name": "מתניה", "phone": "0546649111"},
+  {"street": "קרווילות", "house_num": 6051, "family_name": "סידו", "first_name": "מיכל", "phone": "0544224175"},
+  {"street": "קרווילות", "house_num": 6052, "family_name": "עופרי", "first_name": "אריאל", "phone": "0547775746"},
+  {"street": "קרווילות", "house_num": 6052, "family_name": "עופרי", "first_name": "ניצן", "phone": "0546867200"},
+  {"street": "קרווילות", "house_num": 6053, "family_name": "מרגלית", "first_name": "ישראל", "phone": "0556600170"},
+  {"street": "קרווילות", "house_num": 6053, "family_name": "מרגלית", "first_name": "נועה", "phone": "0524686850"},
+  {"street": "קראוונים", "house_num": 6001, "family_name": "ליטקה", "first_name": "עדין", "phone": "0542065136"},
+  {"street": "קראוונים", "house_num": 6001, "family_name": "ליטקה", "first_name": "הילה", "phone": "0527995244"},
+  {"street": "קראוונים", "house_num": 6002, "family_name": "גלזר", "first_name": "אביב", "phone": "0585353102"},
+  {"street": "קראוונים", "house_num": 6002, "family_name": "גלזר", "first_name": "טופז", "phone": "0523121041"},
+  {"street": "קראוונים", "house_num": 6003, "family_name": "בירנצויג", "first_name": "הילה", "phone": "0509942860"},
+  {"street": "קראוונים", "house_num": 6005, "family_name": "רכל", "first_name": "צבי", "phone": "0544581133"},
+  {"street": "קראוונים", "house_num": 6005, "family_name": "רכל", "first_name": "רוני", "phone": "0587044718"},
+  {"street": "קראוונים", "house_num": 6006, "family_name": "ניסים", "first_name": "אוהד", "phone": "0543073009"},
+  {"street": "קראוונים", "house_num": 6006, "family_name": "ניסים", "first_name": "קרן", "phone": "0508148892"},
+  {"street": "קראוונים", "house_num": 6007, "family_name": "ברר", "first_name": "משה", "phone": "0556623283"},
+  {"street": "קראוונים", "house_num": 6007, "family_name": "ברר", "first_name": "ארבל", "phone": "0584022231"},
+  {"street": "קראוונים", "house_num": 6008, "family_name": "בורה", "first_name": "גילעד", "phone": "0522555526"},
+  {"street": "קראוונים", "house_num": 6008, "family_name": "בורה", "first_name": "רעות", "phone": "0584050254"},
+  {"street": "קראוונים", "house_num": 6009, "family_name": "ברזילי", "first_name": "עודד", "phone": "0556677606"},
+  {"street": "קראוונים", "house_num": 6009, "family_name": "ברזילי", "first_name": "עדי", "phone": "0558818910"},
+  {"street": "קראוונים", "house_num": 6010, "family_name": "צוקרמן", "first_name": "ישראל", "phone": "0587654653"},
+  {"street": "קראוונים", "house_num": 6010, "family_name": "צוקרמן", "first_name": "שירה", "phone": "0585426200"},
+  {"street": "קראוונים", "house_num": 6012, "family_name": "פרנקל", "first_name": "אביאל", "phone": "0584540304"},
+  {"street": "קראוונים", "house_num": 6012, "family_name": "פרנקל", "first_name": "אליאור", "phone": "0524639080"},
+  {"street": "קראוונים", "house_num": 6013, "family_name": "לסרי", "first_name": "אביחי", "phone": "0523337059"},
+  {"street": "קראוונים", "house_num": 6013, "family_name": "לסרי", "first_name": "רחלי", "phone": "0527203214"},
+  {"street": "קראוונים", "house_num": 6014, "family_name": "בוכריס", "first_name": "שליו", "phone": "0506718546"},
+  {"street": "קראוונים", "house_num": 6014, "family_name": "בוכריס", "first_name": "בינה", "phone": "0512084144"},
+  {"street": "קראוונים", "house_num": 6015, "family_name": "צבירי", "first_name": "אורי", "phone": "0549256111"},
+  {"street": "קראוונים", "house_num": 6015, "family_name": "צבירי", "first_name": "רויה", "phone": "0543556469"},
+  {"street": "קראוונים", "house_num": 6016, "family_name": "תנעמי", "first_name": "לביא", "phone": "0586060031"},
+  {"street": "קראוונים", "house_num": 6016, "family_name": "תנעמי", "first_name": "אמונה", "phone": "0584891739"},
+  {"street": "קראוונים", "house_num": 6017, "family_name": "פרץ", "first_name": "דביר", "phone": "0545885537"},
+  {"street": "קראוונים", "house_num": 6017, "family_name": "פרץ", "first_name": "שני", "phone": "0526658552"},
+  {"street": "קראוונים", "house_num": 6019, "family_name": "לאוב", "first_name": "נדב", "phone": "0547684075"},
+  {"street": "קראוונים", "house_num": 6019, "family_name": "לאוב", "first_name": "עידית", "phone": "0546619609"},
+  {"street": "קראוונים", "house_num": 6020, "family_name": "אברסין", "first_name": "יעקב", "phone": "0547994703"},
+  {"street": "קראוונים", "house_num": 6020, "family_name": "אברסין", "first_name": "אביה", "phone": "0505228137"},
+  {"street": "קראוונים", "house_num": 6021, "family_name": "עטיה", "first_name": "נועם", "phone": "0536233588"},
+  {"street": "קראוונים", "house_num": 6021, "family_name": "עטיה", "first_name": "סיון", "phone": "0509976483"},
+  {"street": "קראוונים", "house_num": 6022, "family_name": "עוקבי", "first_name": "נריה", "phone": "0529541254"},
+  {"street": "קראוונים", "house_num": 6022, "family_name": "עוקבי", "first_name": "הדר", "phone": "0524185516"},
+  {"street": "קראוונים", "house_num": 6023, "family_name": "שמש", "first_name": "קינן", "phone": "0508567905"},
+  {"street": "קראוונים", "house_num": 6023, "family_name": "שמש", "first_name": "דנה", "phone": "0523360647"},
+  {"street": "קראוונים", "house_num": 6024, "family_name": "אלימלך", "first_name": "בועז", "phone": "0529066303"},
+  {"street": "קראוונים", "house_num": 6024, "family_name": "אלימלך", "first_name": "יהודית", "phone": "0528050412"},
+  {"street": "קראוונים", "house_num": 6025, "family_name": "קוסקאס", "first_name": "שלמה", "phone": "0586480711"},
+  {"street": "קראוונים", "house_num": 6025, "family_name": "קוסקאס", "first_name": "לולה", "phone": "0555002188"},
+  {"street": "קראוונים", "house_num": 6026, "family_name": "הינדי", "first_name": "אור", "phone": "0524760479"},
+  {"street": "קראוונים", "house_num": 6026, "family_name": "הינדי", "first_name": "קרן", "phone": "0549968361"},
+  {"street": "קראוונים", "house_num": 6028, "family_name": "טל", "first_name": "מנדי", "phone": "0502577116"},
+  {"street": "קראוונים", "house_num": 6028, "family_name": "טל", "first_name": "מוריה", "phone": "0504276049"},
+  {"street": "קראוונים", "house_num": 6029, "family_name": "נמיר", "first_name": "שי", "phone": "0534271922"},
+  {"street": "קראוונים", "house_num": 6029, "family_name": "נמיר", "first_name": "רוני", "phone": "0549434455"}
+];
+
+        const tableBody = document.getElementById('tableBody');
+        const resultsCount = document.getElementById('resultsCount');
+        const totalCount = document.getElementById('totalCount');
+        
+        const firstNameInput = document.getElementById('firstName');
+        const familyNameInput = document.getElementById('familyName');
+        const streetInput = document.getElementById('street');
+        const houseNumInput = document.getElementById('houseNum');
+
+        function formatPhone(phone) {
+            if (!phone) return '';
+            if (phone.length === 10) {
+                return phone.slice(0, 3) + '-' + phone.slice(3, 6) + '-' + phone.slice(6);
+            }
+            return phone;
+        }
+
+        function renderTable(filteredData) {
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="no-results">לא נמצאו תוצאות</td></tr>';
+            } else {
+                tableBody.innerHTML = filteredData.map(item => `
+                    <tr>
+                        <td>${item.first_name}</td>
+                        <td>${item.family_name}</td>
+                        <td>${item.street}</td>
+                        <td>${item.house_num}</td>
+                        <td><a href="tel:${item.phone}" class="phone-link">${formatPhone(item.phone)}</a></td>
+                    </tr>
+                `).join('');
+            }
+            resultsCount.textContent = filteredData.length;
+        }
+
+        function filterData() {
+            const firstName = firstNameInput.value.trim().toLowerCase();
+            const familyName = familyNameInput.value.trim().toLowerCase();
+            const street = streetInput.value.trim().toLowerCase();
+            const houseNum = houseNumInput.value.trim();
+
+            const filtered = data.filter(item => {
+                const matchFirstName = !firstName || item.first_name.toLowerCase().includes(firstName);
+                const matchFamilyName = !familyName || item.family_name.toLowerCase().includes(familyName);
+                const matchStreet = !street || item.street.toLowerCase().includes(street);
+                const matchHouseNum = !houseNum || String(item.house_num).includes(houseNum);
+                
+                return matchFirstName && matchFamilyName && matchStreet && matchHouseNum;
+            });
+
+            renderTable(filtered);
+        }
+
+        function clearFilters() {
+            firstNameInput.value = '';
+            familyNameInput.value = '';
+            streetInput.value = '';
+            houseNumInput.value = '';
+            filterData();
+        }
+
+        firstNameInput.addEventListener('input', filterData);
+        familyNameInput.addEventListener('input', filterData);
+        streetInput.addEventListener('input', filterData);
+        houseNumInput.addEventListener('input', filterData);
+
+        totalCount.textContent = data.length;
+        renderTable(data);
+    </script>
+</body>
+</html>
