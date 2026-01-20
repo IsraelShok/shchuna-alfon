@@ -134,8 +134,31 @@
         .phone-cell {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             justify-content: flex-start;
+        }
+        
+        .phone-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background-color: #3498db;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .phone-icon-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.4);
+        }
+        
+        .phone-icon-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
         }
         
         .phone-link {
@@ -277,18 +300,22 @@
                 min-width: 100%;
             }
             
-            .phone-cell {
-                flex-direction: column;
-                gap: 5px;
-                align-items: flex-start;
-            }
-            
             .whatsapp-btn {
                 width: 28px;
                 height: 28px;
             }
             
             .whatsapp-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+            
+            .phone-icon-btn {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .phone-icon-btn svg {
                 width: 16px;
                 height: 16px;
             }
@@ -337,12 +364,12 @@
                 <input type="text" id="familyName" placeholder="חפש שם משפחה...">
             </div>
             <div class="filter-group">
-                <label for="street">רחוב</label>
-                <input type="text" id="street" placeholder="חפש רחוב...">
+                <label for="address">כתובת</label>
+                <input type="text" id="address" placeholder="חפש רחוב או מספר...">
             </div>
             <div class="filter-group">
-                <label for="houseNum">מספר בית</label>
-                <input type="text" id="houseNum" placeholder="חפש מספר...">
+                <label for="phone">טלפון</label>
+                <input type="text" id="phone" placeholder="חפש טלפון...">
             </div>
         </div>
         
@@ -381,8 +408,8 @@
         
         const firstNameInput = document.getElementById('firstName');
         const familyNameInput = document.getElementById('familyName');
-        const streetInput = document.getElementById('street');
-        const houseNumInput = document.getElementById('houseNum');
+        const addressInput = document.getElementById('address');
+        const phoneInput = document.getElementById('phone');
 
         // Load data from Google Sheets
         async function loadData() {
@@ -461,6 +488,7 @@
 
         function renderTable(filteredData) {
             const whatsappIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`;
+            const phoneIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`;
             
             if (filteredData.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="5" class="no-results">לא נמצאו תוצאות</td></tr>';
@@ -477,8 +505,8 @@
                         <td>${item.house_num}</td>
                         <td>
                             <div class="phone-cell">
-                                <a href="tel:${item.phone}" class="phone-link">${formatPhone(item.phone)}</a>
                                 ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" class="whatsapp-btn" title="שלח הודעה בוואטסאפ">${whatsappIcon}</a>` : ''}
+                                ${item.phone ? `<a href="tel:${item.phone}" class="phone-icon-btn" title="התקשר ${formatPhone(item.phone)}">${phoneIcon}</a>` : ''}
                             </div>
                         </td>
                     </tr>
@@ -490,16 +518,18 @@
         function filterData() {
             const firstName = firstNameInput.value.trim().toLowerCase();
             const familyName = familyNameInput.value.trim().toLowerCase();
-            const street = streetInput.value.trim().toLowerCase();
-            const houseNum = houseNumInput.value.trim();
+            const address = addressInput.value.trim().toLowerCase();
+            const phone = phoneInput.value.trim();
 
             const filtered = data.filter(item => {
                 const matchFirstName = !firstName || item.first_name.toLowerCase().includes(firstName);
                 const matchFamilyName = !familyName || item.family_name.toLowerCase().includes(familyName);
-                const matchStreet = !street || item.street.toLowerCase().includes(street);
-                const matchHouseNum = !houseNum || String(item.house_num).includes(houseNum);
+                const matchAddress = !address || 
+                    item.street.toLowerCase().includes(address) || 
+                    String(item.house_num).includes(address);
+                const matchPhone = !phone || item.phone.includes(phone);
                 
-                return matchFirstName && matchFamilyName && matchStreet && matchHouseNum;
+                return matchFirstName && matchFamilyName && matchAddress && matchPhone;
             });
 
             renderTable(filtered);
@@ -508,8 +538,8 @@
         // Event listeners for real-time filtering
         firstNameInput.addEventListener('input', filterData);
         familyNameInput.addEventListener('input', filterData);
-        streetInput.addEventListener('input', filterData);
-        houseNumInput.addEventListener('input', filterData);
+        addressInput.addEventListener('input', filterData);
+        phoneInput.addEventListener('input', filterData);
 
         // Load data on page load
         loadData();
