@@ -109,6 +109,26 @@
             font-size: 1.1em;
         }
         
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        
+        th.sortable:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .sort-icon {
+            margin-right: 5px;
+            opacity: 0.5;
+            font-size: 0.8em;
+        }
+        
+        th.sortable.active .sort-icon {
+            opacity: 1;
+        }
+        
         tbody tr {
             border-bottom: 1px solid #f0f0f0;
             transition: background-color 0.2s;
@@ -381,10 +401,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>שם פרטי</th>
-                        <th>שם משפחה</th>
-                        <th>רחוב</th>
-                        <th>מספר</th>
+                        <th class="sortable active" data-column="family_name" onclick="sortData('family_name')">שם משפחה <span class="sort-icon">▲</span></th>
+                        <th class="sortable" data-column="first_name" onclick="sortData('first_name')">שם פרטי <span class="sort-icon">⇅</span></th>
+                        <th class="sortable" data-column="street" onclick="sortData('street')">רחוב <span class="sort-icon">⇅</span></th>
+                        <th class="sortable" data-column="house_num" onclick="sortData('house_num')">מספר <span class="sort-icon">⇅</span></th>
                         <th>טלפון</th>
                     </tr>
                 </thead>
@@ -410,6 +430,46 @@
         const familyNameInput = document.getElementById('familyName');
         const addressInput = document.getElementById('address');
         const phoneInput = document.getElementById('phone');
+        
+        // Sorting state - default sort by family name ascending
+        let currentSort = { column: 'family_name', direction: 'asc' };
+        
+        // Sort data function
+        function sortData(column) {
+            if (currentSort.column === column) {
+                // Same column - cycle through states
+                if (currentSort.direction === 'asc') {
+                    currentSort.direction = 'desc';
+                } else if (currentSort.direction === 'desc') {
+                    currentSort.column = null;
+                    currentSort.direction = null;
+                } else {
+                    currentSort.direction = 'asc';
+                }
+            } else {
+                // New column - start with ascending
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+            updateSortIcons();
+            filterData();
+        }
+        
+        // Update sort icons in table headers
+        function updateSortIcons() {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                const column = th.dataset.column;
+                const icon = th.querySelector('.sort-icon');
+                
+                if (column === currentSort.column) {
+                    th.classList.add('active');
+                    icon.textContent = currentSort.direction === 'asc' ? '▲' : '▼';
+                } else {
+                    th.classList.remove('active');
+                    icon.textContent = '⇅';
+                }
+            });
+        }
 
         // Load data from Google Sheets
         async function loadData() {
@@ -499,8 +559,8 @@
                     
                     return `
                     <tr>
-                        <td>${item.first_name}</td>
                         <td>${item.family_name}</td>
+                        <td>${item.first_name}</td>
                         <td>${item.street}</td>
                         <td>${item.house_num}</td>
                         <td>
@@ -521,7 +581,7 @@
             const address = addressInput.value.trim().toLowerCase();
             const phone = phoneInput.value.trim();
 
-            const filtered = data.filter(item => {
+            let filtered = data.filter(item => {
                 const matchFirstName = !firstName || item.first_name.toLowerCase().includes(firstName);
                 const matchFamilyName = !familyName || item.family_name.toLowerCase().includes(familyName);
                 const matchAddress = !address || 
@@ -531,6 +591,27 @@
                 
                 return matchFirstName && matchFamilyName && matchAddress && matchPhone;
             });
+            
+            // Apply sorting if active
+            if (currentSort.column && currentSort.direction) {
+                filtered.sort((a, b) => {
+                    let valA = a[currentSort.column];
+                    let valB = b[currentSort.column];
+                    
+                    // Numeric sort for house number
+                    if (currentSort.column === 'house_num') {
+                        valA = parseInt(valA) || 0;
+                        valB = parseInt(valB) || 0;
+                    } else {
+                        valA = String(valA || '').toLowerCase();
+                        valB = String(valB || '').toLowerCase();
+                    }
+                    
+                    if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
 
             renderTable(filtered);
         }
